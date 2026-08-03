@@ -130,7 +130,7 @@ Built with **LangGraph** for agent orchestration, with conditional routing for t
 Change one line in `.env` — no code changes needed:
 
 ```
-LLM_PROVIDER=claude    # or openai / groq / ollama
+LLM_PROVIDER= llm    # llm = claude / openai / groq / ollama
 ```
 
 Every agent calls a single `call_llm()` function in `backend/llm.py`, which routes to the selected provider.
