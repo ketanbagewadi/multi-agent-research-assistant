@@ -1,6 +1,9 @@
+# backend/graph.py
+
 from typing import TypedDict, Optional
 from langgraph.graph import StateGraph, END
 
+from backend.agents.planner import planner_node
 from backend.agents.searcher import searcher_node
 from backend.agents.summarizer import summarizer_node
 from backend.agents.verifier import verifier_node
@@ -9,6 +12,7 @@ from backend.agents.writer import writer_node
 
 class AgentState(TypedDict):
     query: str
+    sub_tasks: Optional[list]
     search_results: Optional[list]
     search_text: Optional[str]
     summary: Optional[str]
@@ -36,13 +40,15 @@ def route_after_verifier(state: AgentState) -> str:
 def build_graph():
     graph = StateGraph(AgentState)
 
+    graph.add_node("planner", planner_node)
     graph.add_node("searcher", searcher_node)
     graph.add_node("summarizer", summarizer_node)
     graph.add_node("verifier", verifier_node)
     graph.add_node("writer", writer_node)
 
-    graph.set_entry_point("searcher")
+    graph.set_entry_point("planner")
 
+    graph.add_edge("planner", "searcher")
     graph.add_edge("searcher", "summarizer")
     graph.add_edge("summarizer", "verifier")
 
