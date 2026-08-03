@@ -22,7 +22,7 @@ def searcher_node(state: dict) -> dict:
 
     # Calls the MCP server instead of tools.py directly
     search_text = call_mcp_tool(
-        server_script=SEARCH_SERVER,
+        module_name=SEARCH_SERVER,
         tool_name="search",
         arguments={"query": query, "max_results": 5}
     )
