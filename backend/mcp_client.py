@@ -1,20 +1,12 @@
-# backend/mcp_client.py
-
 import asyncio
 from mcp import ClientSession, StdioServerParameters
 from mcp.client.stdio import stdio_client
 
-# ---------------------------------------------------------
-# Generic MCP client helper.
-# Spawns the MCP server as a subprocess, calls a tool on it,
-# and returns the result. Used by agents instead of direct
-# function calls.
-# ---------------------------------------------------------
 
-async def _call_mcp_tool_async(server_script: str, tool_name: str, arguments: dict) -> str:
+async def _call_mcp_tool_async(module_name: str, tool_name: str, arguments: dict) -> str:
     server_params = StdioServerParameters(
         command="python",
-        args=[server_script],
+        args=["-m", module_name],
     )
 
     async with stdio_client(server_params) as (read, write):
@@ -24,6 +16,5 @@ async def _call_mcp_tool_async(server_script: str, tool_name: str, arguments: di
             return result.content[0].text
 
 
-def call_mcp_tool(server_script: str, tool_name: str, arguments: dict) -> str:
-    """Sync wrapper — call this from agent code."""
-    return asyncio.run(_call_mcp_tool_async(server_script, tool_name, arguments))
+def call_mcp_tool(module_name: str, tool_name: str, arguments: dict) -> str:
+    return asyncio.run(_call_mcp_tool_async(module_name, tool_name, arguments))

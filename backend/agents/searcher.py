@@ -2,8 +2,7 @@
 
 from backend.mcp_client import call_mcp_tool
 
-SEARCH_SERVER = "backend/mcp_servers/web_search_server.py"
-
+SEARCH_SERVER = "backend.mcp_servers.web_search_server"
 
 def searcher_node(state: dict) -> dict:
     """
