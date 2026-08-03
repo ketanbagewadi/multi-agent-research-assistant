@@ -5,22 +5,34 @@ A multi-agent AI system where specialized agents collaborate to research a topic
 
 
 ```text
+## Project Structure
+
 research-agent/
 ├── backend/
-│   ├── main.py              # FastAPI app + SSE endpoint
+│   ├── __init__.py
+│   ├── main.py
+│   ├── graph.py
+│   ├── llm.py
+│   ├── tools.py                    # still holds raw web_search() — MCP server wraps this
+│   ├── mcp_client.py                # ← new: generic MCP client helper
+│   ├── db.py
 │   ├── agents/
-│   │   ├── searcher.py      # Executes targeted web queries
-│   │   ├── summarizer.py    # Extracts key context from raw data
-│   │   ├── verifier.py      # Cross-references facts & flags contradictions
-│   │   └── writer.py        # Compiles the final structured markdown report
-│   ├── graph.py              # LangGraph orchestration & state pipeline
-│   ├── llm.py                 # Core routing model (Claude API / Local Ollama)
-│   ├── tools.py               # Tavily search wrapper API integration
-│   ├── db.py                   # SQLite configuration for session memory
-│   └── requirements.txt     # Python project dependencies
+│   │   ├── __init__.py
+│   │   ├── planner.py
+│   │   ├── searcher.py              # ← will modify: uses mcp_client now
+│   │   ├── summarizer.py
+│   │   ├── verifier.py              # ← will modify: uses mcp_client now
+│   │   └── writer.py
+│   ├── mcp_servers/
+│   │   ├── __init__.py
+│   │   ├── web_search_server.py     # ← new: MCP server for search
+│   │   └── fact_check_server.py     # ← next: MCP server for verification
+│   ├── .env
+│   └── requirements.txt
 ├── frontend/
-│   └── index.html            # Minimalist single-file UI (HTML + CSS + Vanilla JS)
-└── README.md                # System documentation
+│   └── index.html
+└── README.md
+
 ```
 
 
