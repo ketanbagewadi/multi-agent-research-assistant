@@ -13,20 +13,20 @@ research-agent/
 │   ├── main.py
 │   ├── graph.py
 │   ├── llm.py
-│   ├── tools.py                    # still holds raw web_search() — MCP server wraps this
-│   ├── mcp_client.py                # ← new: generic MCP client helper
+│   ├── tools.py                   
+│   ├── mcp_client.py               
 │   ├── db.py
 │   ├── agents/
 │   │   ├── __init__.py
 │   │   ├── planner.py
-│   │   ├── searcher.py              # ← will modify: uses mcp_client now
+│   │   ├── searcher.py              
 │   │   ├── summarizer.py
-│   │   ├── verifier.py              # ← will modify: uses mcp_client now
+│   │   ├── verifier.py             
 │   │   └── writer.py
 │   ├── mcp_servers/
 │   │   ├── __init__.py
-│   │   ├── web_search_server.py     # ← new: MCP server for search
-│   │   └── fact_check_server.py     # ← next: MCP server for verification
+│   │   ├── web_search_server.py     
+│   │   └── fact_check_server.py     
 │   ├── .env
 │   └── requirements.txt
 ├── frontend/
