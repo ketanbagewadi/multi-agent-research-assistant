@@ -1,5 +1,9 @@
 # multi-agent-research-assistant
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 498f424 (added tools.py)
 ```text
 research-agent/
 ├── backend/
