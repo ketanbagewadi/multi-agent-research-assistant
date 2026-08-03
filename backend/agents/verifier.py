@@ -1,14 +1,9 @@
 # backend/agents/verifier.py
 
-from backend.tools import web_search, format_results_for_llm
+from backend.mcp_client import call_mcp_tool
 from backend.llm import call_llm
 
-# ---------------------------------------------------------
-# Verifier Agent
-# Job: take the Summarizer's output and fact-check it by
-# doing a SECOND, independent search. Then ask the LLM to
-# judge if the summary is well-supported or not.
-# ---------------------------------------------------------
+FACT_CHECK_SERVER = "backend.mcp_servers.fact_check_server"
 
 VERIFIER_SYSTEM_PROMPT = """You are a fact-checker.
 You will be given a summary and a fresh set of independent search results.
@@ -23,25 +18,17 @@ The claims match the independent search results closely.
 
 
 def verifier_node(state: dict) -> dict:
-    """
-    Input:  state["summary"]       -> summary from Summarizer agent
-            state["query"]         -> original user query
-            state["retry_count"]   -> how many times we've retried (default 0)
-    Output: state["verified"]      -> True/False
-            state["retry_count"]   -> incremented if failed
-            state["verify_reason"] -> LLM's reasoning (useful for debugging/logs)
-    """
-
     query = state["query"]
     summary = state["summary"]
     retry_count = state.get("retry_count", 0)
 
-    print("[verifier] Running independent fact-check search...")
+    print("[verifier] Calling MCP fact-check tool...")
 
-    # Independent search — different from Searcher's original results,
-    # so we're not just checking the summary against itself.
-    check_results = web_search(f"verify facts: {query}", max_results=3)
-    check_text = format_results_for_llm(check_results)
+    check_text = call_mcp_tool(
+        module_name=FACT_CHECK_SERVER,
+        tool_name="verify_search",
+        arguments={"query": query, "max_results": 3}
+    )
 
     prompt = f"""Summary to verify:
 {summary}
@@ -53,7 +40,6 @@ Does the summary's claims hold up against these independent results?"""
 
     verdict = call_llm(prompt, system=VERIFIER_SYSTEM_PROMPT)
 
-    # Parse first line for PASS/FAIL
     first_line = verdict.strip().split("\n")[0].strip().upper()
     passed = "PASS" in first_line
 
@@ -63,6 +49,5 @@ Does the summary's claims hold up against these independent results?"""
 
     status = "✅ PASSED" if passed else f"❌ FAILED (retry {state['retry_count']})"
     print(f"[verifier] {status}")
-    print(f"[verifier] Reason: {verdict[:150]}...")
 
     return state
