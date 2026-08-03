@@ -3,6 +3,7 @@
 A multi-agent AI system where specialized agents collaborate to research a topic end-to-end — search, summarize, verify, and write — with a self-correction retry loop and a live-streaming case-file UI.
 
 
+
 ```text
 research-agent/
 ├── backend/
@@ -28,6 +29,7 @@ research-agent/
 
 - Python >= 3.10
 - Free API keys: [Tavily](https://tavily.com) (search), and one LLM provider — [Anthropic](https://console.anthropic.com), [OpenAI](https://platform.openai.com), [Groq](https://console.groq.com), or a local [Ollama](https://ollama.com) install
+- `mcp[cli]>=1.27,<2` — the official MCP Python SDK moved to a breaking v2.0.0 API; this project targets the stable v1.x line
 - Full dependency list: `backend/requirements.txt`
 
 ## How It Works
@@ -35,11 +37,13 @@ research-agent/
 ```
 User Query
    ↓
-Searcher Agent    → web search via Tavily
+Planner Agent     → breaks the query into focused sub-questions
+   ↓
+Searcher Agent    → calls the MCP web-search tool server (wraps Tavily)
    ↓
 Summarizer Agent  → condenses findings into bullet points
    ↓
-Verifier Agent    → independent re-search to fact-check the summary
+Verifier Agent    → calls the MCP fact-check tool server (independent re-search)
    │
    ├── fails (retry < 2) → loops back to Searcher
    └── passes / retries exhausted ↓
@@ -48,27 +52,30 @@ Writer Agent      → composes the final report
 Streamed live to frontend via SSE, saved to SQLite
 ```
 
-Built with **LangGraph** for agent orchestration, with conditional routing for the verify-and-retry loop.
+Built with **LangGraph** for agent orchestration (task decomposition, conditional routing, verify-and-retry loop) and the **Model Context Protocol (MCP)** for standardized tool access — Searcher and Verifier connect to dedicated MCP servers as clients over stdio, rather than calling search functions directly.
 
 ## Directory Structure
 
-| Folder / File          | Description                                              |
-| ----------------------- | --------------------------------------------------------- |
-| `backend/agents/`       | One file per agent — `searcher.py`, `summarizer.py`, `verifier.py`, `writer.py` |
-| `backend/graph.py`      | LangGraph pipeline — wires agents together, defines retry logic |
-| `backend/llm.py`        | Pluggable LLM layer — switches between Claude, OpenAI, Groq, or Ollama via `.env` |
-| `backend/tools.py`      | Tavily search wrapper — the only file that calls the search API directly |
-| `backend/db.py`         | SQLite setup — saves and retrieves past research reports |
-| `backend/main.py`       | FastAPI app — `/run-agent` SSE streaming endpoint         |
-| `frontend/index.html`   | Single-file UI (HTML/CSS/JS) — case-file themed, streams agent progress live |
+| Folder / File            | Description                                              |
+| -------------------------- | --------------------------------------------------------- |
+| `backend/agents/`          | One file per agent — `planner.py`, `searcher.py`, `summarizer.py`, `verifier.py`, `writer.py` |
+| `backend/graph.py`         | LangGraph pipeline — wires agents together, defines retry logic |
+| `backend/llm.py`           | Pluggable LLM layer — switches between Claude, OpenAI, Groq, or Ollama via `.env` |
+| `backend/tools.py`         | Raw Tavily search wrapper — wrapped by the MCP servers below |
+| `backend/mcp_servers/`     | MCP tool servers — `web_search_server.py` (search) and `fact_check_server.py` (verification) |
+| `backend/mcp_client.py`    | Generic MCP client helper — spawns an MCP server over stdio and calls its tool |
+| `backend/db.py`            | SQLite setup — saves and retrieves past research reports |
+| `backend/main.py`          | FastAPI app — `/run-agent` SSE streaming endpoint         |
+| `frontend/index.html`      | Single-file UI (HTML/CSS/JS) — case-file themed, streams agent progress live |
 
 ## Tech Stack
 
 | Layer            | Tool                                  |
 | ------------------ | -------------------------------------- |
 | Orchestration     | LangGraph                              |
+| Tool protocol     | MCP (Model Context Protocol) — stdio transport |
 | LLM               | Claude / OpenAI / Groq / Ollama (pluggable) |
-| Web search        | Tavily API                             |
+| Web search        | Tavily API (via MCP tool servers)      |
 | Backend           | Python + FastAPI                       |
 | Streaming         | Server-Sent Events (SSE)               |
 | Database          | SQLite                                 |
@@ -130,7 +137,7 @@ Built with **LangGraph** for agent orchestration, with conditional routing for t
 Change one line in `.env` — no code changes needed:
 
 ```
-LLM_PROVIDER= llm    # llm = claude / openai / groq / ollama
+LLM_PROVIDER=llm    # llm = claude / openai / groq / ollama
 ```
 
 Every agent calls a single `call_llm()` function in `backend/llm.py`, which routes to the selected provider.
@@ -143,7 +150,8 @@ Streams live progress via SSE — one event per agent step (`searcher`, `summari
 ## Notes
 
 - Retry loop caps at 2 attempts — if the Verifier still can't confirm the summary after 2 retries, the Writer produces a best-effort report anyway rather than failing silently.
-- Tavily calls are isolated in `tools.py` — swapping to a different search provider (SerpAPI, Firecrawl, etc.) only requires editing that one file.
+- Tavily calls are isolated in `tools.py` — swapping to a different search provider (SerpAPI, Firecrawl, etc.) only requires editing that one file, since both MCP servers wrap it.
+- MCP servers run as subprocesses launched with `python -m <module>` (not a raw file path) so they resolve the `backend` package correctly — see `mcp_client.py`.
 
 ## Links
 
