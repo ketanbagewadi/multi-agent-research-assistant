@@ -1,5 +1,3 @@
-# backend/agents/verifier.py
-
 from backend.mcp_client import call_mcp_tool
 from backend.llm import call_llm
 
@@ -47,7 +45,7 @@ Does the summary's claims hold up against these independent results?"""
     state["verify_reason"] = verdict
     state["retry_count"] = retry_count if passed else retry_count + 1
 
-    status = "✅ PASSED" if passed else f"❌ FAILED (retry {state['retry_count']})"
+    status = "PASSED" if passed else f"FAILED (retry {state['retry_count']})"
     print(f"[verifier] {status}")
 
     return state
