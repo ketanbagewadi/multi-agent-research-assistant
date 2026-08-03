@@ -1,104 +1,354 @@
-<!-- frontend/index.html -->
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Multi-Agent Research Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Desk — Case File</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Source+Serif+4:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <style>
-        body {
-            font-family: system-ui, sans-serif;
-            max-width: 700px;
-            margin: 40px auto;
-            padding: 0 20px;
-            background: #0f0f0f;
-            color: #eee;
+        :root {
+            --ink: #14181c;
+            --ink-2: #1c2127;
+            --paper: #e8e2d0;
+            --paper-dim: #c9c2ac;
+            --brass: #c98a3e;
+            --stamp-red: #a63d40;
+            --line: #3a4048;
         }
 
-        h1 {
-            font-size: 22px;
-        }
-
-        #query {
-            width: 100%;
-            padding: 10px;
-            font-size: 16px;
-            border-radius: 6px;
-            border: 1px solid #333;
-            background: #1a1a1a;
-            color: #eee;
+        * {
             box-sizing: border-box;
         }
 
-        button {
-            margin-top: 10px;
-            padding: 10px 20px;
-            font-size: 15px;
-            border: none;
+        body {
+            margin: 0;
+            min-height: 100vh;
+            background:
+                radial-gradient(ellipse at top left, #1a2028 0%, var(--ink) 55%);
+            color: var(--paper);
+            font-family: 'JetBrains Mono', monospace;
+            display: flex;
+            justify-content: center;
+            padding: 48px 20px 80px;
+        }
+
+        .file {
+            width: 100%;
+            max-width: 680px;
+        }
+
+        /* ---- Header: case tab ---- */
+        .tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--brass);
+            color: var(--ink);
+            font-family: 'Special Elite', monospace;
+            font-size: 12px;
+            letter-spacing: 0.12em;
+            padding: 6px 14px;
+            border-radius: 3px 3px 0 0;
+            text-transform: uppercase;
+        }
+
+        .case-number {
+            opacity: 0.7;
+        }
+
+        header {
+            border: 1px solid var(--line);
+            border-top: 4px solid var(--brass);
+            background: linear-gradient(180deg, var(--ink-2), var(--ink));
+            padding: 28px 30px 24px;
+            border-radius: 0 6px 6px 6px;
+        }
+
+        h1 {
+            font-family: 'Special Elite', monospace;
+            font-size: 26px;
+            margin: 4px 0 6px;
+            letter-spacing: 0.01em;
+        }
+
+        .subtitle {
+            font-size: 12.5px;
+            color: var(--paper-dim);
+            line-height: 1.6;
+            max-width: 46ch;
+        }
+
+        /* ---- Query input ---- */
+        .query-block {
+            margin-top: 28px;
+            border: 1px solid var(--line);
+            background: rgba(232, 226, 208, 0.03);
             border-radius: 6px;
-            background: #4f8cff;
-            color: white;
+            padding: 20px 22px;
+        }
+
+        .field-label {
+            font-size: 10.5px;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--brass);
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: stretch;
+        }
+
+        #query {
+            flex: 1;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid var(--line);
+            color: var(--paper);
+            font-family: 'Source Serif 4', serif;
+            font-size: 17px;
+            padding: 8px 2px 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        #query:focus {
+            border-bottom-color: var(--brass);
+        }
+
+        #query::placeholder {
+            color: #5b6270;
+            font-style: italic;
+        }
+
+        #runBtn {
+            font-family: 'Special Elite', monospace;
+            font-size: 12.5px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: var(--stamp-red);
+            color: var(--paper);
+            border: none;
+            padding: 0 22px;
+            border-radius: 4px;
             cursor: pointer;
+            transition: transform 0.12s, background 0.2s;
         }
 
-        button:disabled {
-            background: #555;
+        #runBtn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            background: #b8484b;
+        }
+
+        #runBtn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        #runBtn:disabled {
+            background: #4a4f57;
             cursor: not-allowed;
+            color: #8a8f97;
         }
 
+        /* ---- Timeline / stamps ---- */
         #timeline {
-            margin-top: 25px;
+            margin-top: 22px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .step {
-            padding: 8px 12px;
-            border-radius: 6px;
-            background: #1a1a1a;
-            border-left: 3px solid #444;
-            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 10px 16px;
+            border: 1px dashed var(--line);
+            border-radius: 5px;
+            font-size: 13px;
+            color: var(--paper-dim);
+            opacity: 0;
+            transform: scale(0.94) rotate(-1deg);
+            animation: stamp-in 0.35s ease forwards;
         }
 
-        .step.done {
-            border-left-color: #4caf50;
+        @keyframes stamp-in {
+            0% {
+                opacity: 0;
+                transform: scale(1.3) rotate(-3deg);
+            }
+
+            60% {
+                opacity: 1;
+                transform: scale(0.96) rotate(1deg);
+            }
+
+            100% {
+                opacity: 1;
+                transform: scale(1) rotate(-0.6deg);
+            }
         }
 
+        .stamp-mark {
+            font-family: 'Special Elite', monospace;
+            font-size: 10px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            border: 2px solid var(--stamp-red);
+            color: var(--stamp-red);
+            padding: 3px 8px;
+            border-radius: 3px;
+            transform: rotate(-6deg);
+            white-space: nowrap;
+        }
+
+        .step-text {
+            color: var(--paper);
+            font-family: 'Source Serif 4', serif;
+            font-size: 14.5px;
+        }
+
+        /* ---- Report ---- */
         #report {
-            margin-top: 25px;
-            padding: 15px;
-            background: #1a1a1a;
-            border-radius: 8px;
-            white-space: pre-wrap;
-            line-height: 1.5;
+            margin-top: 26px;
             display: none;
+            background: var(--paper);
+            color: #1c1a14;
+            border-radius: 4px;
+            padding: 32px 34px;
+            box-shadow: 0 12px 34px rgba(0, 0, 0, 0.45);
+            position: relative;
+            transform: rotate(-0.3deg);
+        }
+
+        #report::before {
+            content: "FILED";
+            position: absolute;
+            top: 18px;
+            right: 26px;
+            font-family: 'Special Elite', monospace;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            color: var(--stamp-red);
+            border: 2px solid var(--stamp-red);
+            padding: 3px 10px;
+            border-radius: 3px;
+            transform: rotate(8deg);
+            opacity: 0.85;
+        }
+
+        #report h2 {
+            font-family: 'Special Elite', monospace;
+            font-size: 15px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin: 0 0 16px;
+            color: #57381c;
+            border-bottom: 1px solid #b8ac8c;
+            padding-bottom: 10px;
+        }
+
+        #reportBody {
+            font-family: 'Source Serif 4', serif;
+            font-size: 16px;
+            line-height: 1.75;
+            white-space: pre-wrap;
+        }
+
+        /* ---- Footer meta ---- */
+        .meta {
+            margin-top: 18px;
+            font-size: 10.5px;
+            color: #4d525a;
+            text-align: center;
+            letter-spacing: 0.06em;
+        }
+
+        @media (max-width: 480px) {
+            .input-row {
+                flex-direction: column;
+            }
+
+            #runBtn {
+                padding: 12px;
+            }
+
+            header {
+                padding: 22px 18px 20px;
+            }
+
+            #report {
+                padding: 24px 20px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .step {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <h1>🔎 Multi-Agent Research Assistant</h1>
+    <div class="file">
 
-    <input type="text" id="query" placeholder="Ask a research question..." />
-    <button id="runBtn" onclick="runAgent()">Run</button>
+        <div class="tab">Case File <span class="case-number" id="caseNum">#0000</span></div>
 
-    <div id="timeline"></div>
-    <div id="report"></div>
+        <header>
+            <h1>The Research Desk</h1>
+            <p class="subtitle">Submit a question. Four agents — Searcher, Summarizer, Verifier, Writer — work the case
+                and file a verified report.</p>
+
+            <div class="query-block">
+                <label class="field-label" for="query">Subject of inquiry</label>
+                <div class="input-row">
+                    <input type="text" id="query" placeholder="e.g. best vector databases for RAG in 2026" />
+                    <button id="runBtn" onclick="runAgent()">Open Case</button>
+                </div>
+            </div>
+
+            <div id="timeline"></div>
+        </header>
+
+        <div id="report">
+            <h2>Final Report</h2>
+            <div id="reportBody"></div>
+        </div>
+
+        <div class="meta">MULTI-AGENT RESEARCH ASSISTANT — LANGGRAPH / MCP / SSE</div>
+
+    </div>
 
     <script>
-        // Backend URL — change this when you deploy
         const API_URL = "http://localhost:8000";
 
-        // Friendly labels for each agent step
         const STEP_LABELS = {
-            searcher: "🔍 Searching the web...",
-            summarizer: "📝 Summarizing findings...",
-            verifier: "✅ Verifying facts...",
-            writer: "✍️ Writing final report...",
-            final: "🎉 Done!"
+            searcher: "Field agent dispatched — scanning open sources",
+            summarizer: "Findings condensed into brief",
+            verifier: "Cross-checked against independent sources",
+            writer: "Report drafted for the file"
         };
+
+        const STEP_STAMPS = {
+            searcher: "Searching",
+            summarizer: "Summarized",
+            verifier: "Verified",
+            writer: "Drafted"
+        };
+
+        document.getElementById("caseNum").textContent =
+            "#" + Math.floor(1000 + Math.random() * 8999);
 
         function runAgent() {
             const query = document.getElementById("query").value.trim();
@@ -106,16 +356,15 @@
 
             const btn = document.getElementById("runBtn");
             const timeline = document.getElementById("timeline");
-            const reportBox = document.getElementById("report");
+            const report = document.getElementById("report");
+            const reportBody = document.getElementById("reportBody");
 
-            // Reset UI for a fresh run
             timeline.innerHTML = "";
-            reportBox.style.display = "none";
-            reportBox.textContent = "";
+            report.style.display = "none";
+            reportBody.textContent = "";
             btn.disabled = true;
-            btn.textContent = "Running...";
+            btn.textContent = "Working...";
 
-            // EventSource = browser's built-in SSE client
             const url = `${API_URL}/run-agent?query=${encodeURIComponent(query)}`;
             const eventSource = new EventSource(url);
 
@@ -123,29 +372,33 @@
                 const data = JSON.parse(event.data);
 
                 if (data.node === "final") {
-                    // Final report received — show it and close the stream
-                    reportBox.style.display = "block";
-                    reportBox.textContent = data.report;
+                    report.style.display = "block";
+                    reportBody.textContent = data.report;
                     eventSource.close();
                     btn.disabled = false;
-                    btn.textContent = "Run";
+                    btn.textContent = "Open Case";
+                    report.scrollIntoView({ behavior: "smooth", block: "nearest" });
                 } else {
-                    // Intermediate step — add to timeline
                     const div = document.createElement("div");
-                    div.className = "step done";
-                    div.textContent = STEP_LABELS[data.node] || data.node;
+                    div.className = "step";
+                    div.innerHTML = `
+          <span class="stamp-mark">${STEP_STAMPS[data.node] || data.node}</span>
+          <span class="step-text">${STEP_LABELS[data.node] || data.node}</span>
+        `;
                     timeline.appendChild(div);
                 }
             };
 
             eventSource.onerror = () => {
-                // Connection issue or stream ended unexpectedly
-                console.error("SSE connection error");
                 eventSource.close();
                 btn.disabled = false;
-                btn.textContent = "Run";
+                btn.textContent = "Open Case";
             };
         }
+
+        document.getElementById("query").addEventListener("keydown", (e) => {
+            if (e.key === "Enter") runAgent();
+        });
     </script>
 
 </body>
