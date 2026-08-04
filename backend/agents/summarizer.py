@@ -1,4 +1,3 @@
-# backend/agents/summarizer.py
 
 from backend.llm import call_llm
 

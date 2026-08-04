@@ -1,5 +1,3 @@
-# backend/agents/searcher.py
-
 from backend.mcp_client import call_mcp_tool
 
 SEARCH_SERVER = "backend.mcp_servers.web_search_server"

@@ -1,5 +1,3 @@
-# backend/agents/planner.py
-
 from datetime import date
 from backend.llm import call_llm
 
