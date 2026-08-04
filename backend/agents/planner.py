@@ -3,7 +3,9 @@
 from backend.llm import call_llm
 
 PLANNER_SYSTEM_PROMPT = """You are a research planner.
-Break the user's question into 2-3 focused sub-questions that together cover it well.
+Break the user's question into 2-4 focused sub-questions — one per distinct entity/topic asked about.
+Each sub-question must explicitly include the word "current" or "2026" if asking about a present-day fact,
+to bias search results toward up-to-date information instead of historical lists.
 Respond with ONLY a numbered list, one sub-question per line. No extra text."""
 
 

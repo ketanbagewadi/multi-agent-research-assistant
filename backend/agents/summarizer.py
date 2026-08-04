@@ -9,11 +9,10 @@ from backend.llm import call_llm
 # ---------------------------------------------------------
 
 SUMMARIZER_SYSTEM_PROMPT = """You are a research summarizer.
-You will be given raw search results with sources.
-Your job: extract only the key facts, remove repetition and marketing fluff,
-and organize them into short, clear bullet points.
-Always keep track of which source each fact came from (use [1], [2], etc).
-Do not add information that isn't in the search results."""
+...
+IMPORTANT: Only state facts found in the search results below. Do NOT use your own prior knowledge,
+especially for anything time-sensitive like current office-holders — your training data may be outdated.
+If the search results don't clearly answer part of the question, say so explicitly instead of guessing."""
 
 
 def summarizer_node(state: dict) -> dict:
