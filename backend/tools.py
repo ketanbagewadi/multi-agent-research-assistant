@@ -1,5 +1,3 @@
-# backend/tools.py
-
 import os
 from dotenv import load_dotenv
 from tavily import TavilyClient

@@ -1,5 +1,3 @@
-# backend/main.py
-
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -8,9 +6,7 @@ import json
 from backend.graph import research_graph
 from backend.db import save_report, init_db
 
-# ---------------------------------------------------------
-# FastAPI app setup
-# ---------------------------------------------------------
+#FastAPI 
 
 app = FastAPI(title="Multi-Agent Research Assistant")
 
@@ -29,9 +25,7 @@ def startup():
     print("[main] 🚀 Server started, DB ready.")
 
 
-# ---------------------------------------------------------
-# /run-agent endpoint — streams each agent step as it completes
-# ---------------------------------------------------------
+#run-agent endpoint — streams each agent step as it completes
 
 @app.get("/run-agent")
 async def run_agent(query: str):
@@ -69,10 +63,6 @@ async def run_agent(query: str):
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
-
-# ---------------------------------------------------------
-# Simple health check
-# ---------------------------------------------------------
 
 @app.get("/")
 def health():
