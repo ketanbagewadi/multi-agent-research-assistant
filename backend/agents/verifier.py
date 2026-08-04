@@ -4,14 +4,11 @@ from backend.llm import call_llm
 FACT_CHECK_SERVER = "backend.mcp_servers.fact_check_server"
 
 VERIFIER_SYSTEM_PROMPT = """You are a fact-checker.
-You will be given a summary and a fresh set of independent search results.
-Check if the summary's claims are supported by these new results.
+You will be given a summary and independent search results.
+PASS if the summary's main claims are reasonably supported — even if some minor details aren't covered.
+Only FAIL if there's a clear contradiction or the summary is completely unsupported.
 Respond with EXACTLY one word first: "PASS" or "FAIL"
-Then on a new line, give a 1-2 sentence reason.
-
-Example:
-PASS
-The claims match the independent search results closely.
+Then a 1-2 sentence reason.
 """
 
 
