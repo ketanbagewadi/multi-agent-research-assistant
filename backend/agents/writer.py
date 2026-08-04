@@ -39,6 +39,6 @@ Write the final report."""
 
     state["final_report"] = final_report
 
-    print("[writer] ✅ Report complete.")
+    print("[writer]  Report complete.")
 
     return state
